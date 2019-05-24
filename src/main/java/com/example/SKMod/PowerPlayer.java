@@ -21,26 +21,27 @@ public class PowerPlayer
         if (event.entityPlayer.worldObj.isRemote) return;
         //System.out.println("Xp picked up!");
         //event.entityPlayer.addExperience(100);
-        int added = calcAddonXp(event.entityPlayer.experienceTotal, event.orb.getXpValue());
+        int added = calcAddonXp(event.entityPlayer.experienceTotal, event.orb.getXpValue(), event.entityPlayer);
         if(added > 0) {
             event.entityPlayer.addExperience(added);
-            event.entityPlayer.addChatMessage(new ChatComponentText("SKMod: Added Exp :" + added));
         }
     }
 
-    public int calcAddonXp(int totalXp, int gainXp)
+    public int calcAddonXp(int totalXp, int gainXp, EntityPlayer player)
     {
         int nowLv = xptolv(totalXp);
         int afterLv = xptolv(totalXp + gainXp);
         int ret = 0;
-        if(afterLv < 30 || nowLv == afterLv)
+        if(afterLv < 30 || nowLv >= afterLv)
             return 0;
+        int startlv = (nowLv < 29) ? 29 : nowLv;
         //make 62 for every level
         for(int i = nowLv ; i < afterLv; i += 1)
             ret += xpBarCap(i + 1) - xpBarCap(30);
         //System.out.println("Will add xp :" + ret);
-
-        return ret;
+        player.addChatMessage(new ChatComponentText(
+                "SKMod: Now Lv:" + nowLv +", After Lv:" + afterLv +", Added Exp :" + ret));
+        return (ret > 0) ? ret : 0;
     }
 
     private int xpBarCap(int level)
