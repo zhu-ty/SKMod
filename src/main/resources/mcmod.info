@@ -1,0 +1,16 @@
+[
+{
+  "modid": "SKMod",
+  "name": "ShadowK's Mod",
+  "description": "ShadowK's Mod for Special Useage",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["ShadowK"],
+  "credits": "Github Search!!!",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
