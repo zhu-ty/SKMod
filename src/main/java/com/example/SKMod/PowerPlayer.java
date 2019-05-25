@@ -21,27 +21,39 @@ public class PowerPlayer
         if (event.entityPlayer.worldObj.isRemote) return;
         //System.out.println("Xp picked up!");
         //event.entityPlayer.addExperience(100);
-        int added = calcAddonXp(event.entityPlayer.experienceTotal, event.orb.getXpValue(), event.entityPlayer);
+        int added = calcAddonXp(event.entityPlayer, event.orb.getXpValue());
         if(added > 0) {
             event.entityPlayer.addExperience(added);
         }
     }
 
-    public int calcAddonXp(int totalXp, int gainXp, EntityPlayer player)
+    public int calcAddonXp(EntityPlayer player, int gainXp)
     {
-        int nowLv = xptolv(totalXp);
-        int afterLv = xptolv(totalXp + gainXp);
+        int nowLv = player.experienceLevel;
+        int afterLv = nowLv;
+
+        for(int lastXp = gainXp + getThisXp(nowLv,  player.experience);
+            lastXp > xpBarCapNew(afterLv);)
+        {
+            lastXp = lastXp - xpBarCapNew(afterLv);
+            afterLv++;
+        }
         int ret = 0;
-        if(afterLv < 30 || nowLv >= afterLv)
+        if(nowLv >= afterLv)
             return 0;
-        int startlv = (nowLv < 29) ? 29 : nowLv;
-        //make 62 for every level
         for(int i = nowLv ; i < afterLv; i += 1)
-            ret += xpBarCap(i + 1) - xpBarCap(30);
-        //System.out.println("Will add xp :" + ret);
-        player.addChatMessage(new ChatComponentText(
-                "SKMod: Now Lv:" + nowLv +", After Lv:" + afterLv +", Added Exp :" + ret));
-        return (ret > 0) ? ret : 0;
+            ret += xpBarCap(i+1) - xpBarCapNew(i+1);
+        if(ret > 0) {
+            player.addChatMessage(new ChatComponentText(
+                    "SKMod: Now Lv:" + nowLv + ", After Lv:" + afterLv + ", Added Exp :" + ret));
+            return ret;
+        }
+        return 0;
+    }
+
+    private int getThisXp(int lv, float xpNormal)
+    {
+        return (int)Math.floor(xpNormal * xpBarCap(lv));
     }
 
     private int xpBarCap(int level)
@@ -49,13 +61,41 @@ public class PowerPlayer
         return level >= 30 ? 62 + (level - 30) * 7 : (level >= 15 ? 17 + (level - 15) * 3 : 17);
     }
 
-    private int xptolv( int xp )
+    private int xpBarCapNew(int level)
     {
-        int lv = 0;
-        for( int decr = xpBarCap( lv ); decr <= xp; decr = xpBarCap( lv ) ) {
-            xp -= decr;
-            lv++;
-        }
-        return lv;
+        return level >= 30 ? 62 : (level >= 15 ? 17 + (level - 15) * 3 : 17);
     }
+
+//    private int xp2lvNew(int xp)
+//    {
+//        int lv = 0;
+//        for( int decr = xpBarCapNew( lv ); decr <= xp; decr = xpBarCapNew( lv ) ) {
+//            xp -= decr;
+//            lv++;
+//        }
+//        return lv;
+//    }
+
+    //    private int getFullXp(int lv, float xpNormal)
+//    {
+//        return lv2xp(lv) + getThisXp(lv, xpNormal);
+//    }
+
+//    private int xp2lv(int xp)
+//    {
+//        int lv = 0;
+//        for( int decr = xpBarCap( lv ); decr <= xp; decr = xpBarCap( lv ) ) {
+//            xp -= decr;
+//            lv++;
+//        }
+//        return lv;
+//    }
+
+//    private int lv2xp(int lv)
+//    {
+//        int xp = 0;
+//        for(int l = 0; l < lv; l++)
+//            xp +=  xpBarCap(l);
+//        return xp;
+//    }
 }
